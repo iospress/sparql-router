@@ -2,6 +2,7 @@ import http from 'http'
 import slug from 'slug'
 import https from 'https'
 import functions from './functions.js'
+import sparqljs from 'sparqljs'
 
 // An action will receive the store as the first argument.
 // Since we are only interested in the dispatch (and optionally the state)
@@ -56,12 +57,7 @@ export const updateForm = function (store,form) {
   store.dispatch('FORM', form);
 }
 
-export const updateSlug = function (store,name) {
-  var slug = sanitize(slug(store.query.name).toLowerCase());
-  store.dispatch('SLUG', slug);
-}
-
-export const saveQuery = function (store,query,type,slug) {
+export const saveQuery = function (store,query,form) {
   var callback = function (store,res,result) {
     if (res.statusCode < 300) {
       store.dispatch('MESSAGE',"Query saved successfully.",false);
@@ -70,32 +66,32 @@ export const saveQuery = function (store,query,type,slug) {
       store.dispatch('MESSAGE',result,true);
     }
   };
-  module.exports.writeQuery(store,query,type,slug,callback);
+  module.exports.writeQuery(store,query,form,callback);
 }
 
-export const createQuery = function (store,query,type,slug,router) {
+export const createQuery = function (store,query,form,router) {
   var callback = function (store,res,result) {
     if (res.statusCode < 300) {
       store.dispatch('MESSAGE',"Query created successfully.",false);
       router.go({name: 'edit', params : {
-        type: type,
-        slug: slug
+        type: form.type,
+        slug: form.slug
       }});
       } else {
       result = result.replace(/(?:\r\n|\r|\n)/g, '<br />').replace(/\t/g,'  ');
       store.dispatch('MESSAGE',result,true);
     }
   };
-  module.exports.writeQuery(store,query,type,slug,callback);
+  module.exports.writeQuery(store,query,form,callback);
 }
 
-export const writeQuery = function (store,query,type,slug,cb) {
+export const writeQuery = function (store,query,form,cb) {
   var options = {
     data: query,
     scheme : app.config.public.scheme,
     hostname: app.config.public.hostname,
     port: app.config.public.port,
-    path: "/api/" + type + "/" + slug,
+    path: "/api/" + form.type + "/" + form.slug,
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -106,10 +102,10 @@ export const writeQuery = function (store,query,type,slug,cb) {
   module.exports.sendHTTPRequest(store,options,cb);
 }
 
-export const deleteQuery = function (store,type,slug,router) {
+export const deleteQuery = function (store,slug,type,router) {
   var callback = function (store,res,result) {
     if (res.statusCode < 300) {
-      store.dispatch('MESSAGE',"Query deleted successfully: " + type + "/" + slug,false);
+      store.dispatch('MESSAGE',"Query deleted successfully: " + form.type + "/" + form.slug,false);
       router.go({name: 'new'});
       } else {
       result = result.replace(/(?:\r\n|\r|\n)/g, '<br />').replace(/\t/g,'  ');
@@ -120,7 +116,7 @@ export const deleteQuery = function (store,type,slug,router) {
       scheme : app.config.public.scheme,
       hostname: app.config.public.hostname,
       port: app.config.public.port,
-      path: "/api/" + type + "/" + slug,
+      path: "/api/" + form.type + "/" + form.slug,
       method: "DELETE"
     }
     module.exports.sendHTTPRequest(store,options,callback);
@@ -197,6 +193,22 @@ export const getQueryResults = function (store,res, result) {
     result = result.replace(/(?:\r\n|\r|\n)/g, '<br />').replace(/\t/g,'  ');
     store.dispatch('MESSAGE',result,true);
   }
+};
+
+export const setQueryType = function(store,form,query) {
+  var SparqlParser =  sparqljs.Parser;
+  var parser = new SparqlParser();
+  form.type = "";
+  console.log("query: " + query);
+  var queryObject = parser.parse(query);
+  var queryType = queryObject.queryType;
+
+  if (queryType === "SELECT") {
+    form.type = "tables";
+  } else if (queryType === "DESCRIBE" || queryType === "CONSTRUCT" || queryType === "DESCRIBE" ){
+    form.type = "graphs";
+  }
+  store.dispatch('FORM',form);
 };
 
 export const initStore = function(store) {

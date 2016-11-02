@@ -8,7 +8,7 @@
   		<div id="right" class="col-md-7 col-md-offset-1">
   	    <query-text></query-text>
         <div class="form-group">
-          <button type="button" v-on:click="createQueryAndGo(query,form.type,form.slug)" id="saveQuery" class="btn btn-primary navbar-right">Create</button>
+          <button type="button" v-on:click="createQueryAndGo(query,form.slug)" id="saveQuery" class="btn btn-primary navbar-right">Create</button>
           <button type="button" v-on:click="testQuery(query,form.type)" id="testQuery" class="btn btn-default navbar-right">Test</button>
         </div>
   		</div>
@@ -28,6 +28,7 @@ import QueryText from './QueryText.vue'
 import Results from './Results.vue'
 import functions from './../lib/functions.js'
 import { getQueryMetadata } from '../lib/actions.js'
+import { setQueryType } from '../lib/actions.js'
 import { createQuery } from '../lib/actions.js'
 import { testQuery } from '../lib/actions.js'
 import { initStore } from '../lib/actions.js'
@@ -49,7 +50,8 @@ export default {
      getQueryMetadata: getQueryMetadata,
      testQuery: testQuery,
      createQuery: createQuery,
-     initStore: initStore
+     initStore: initStore,
+     setQueryType: setQueryType
    },
    getters: {
      form: getForm,
@@ -57,8 +59,10 @@ export default {
    }
  },
  methods: {
-   createQueryAndGo : function (query,type,slug) {
-     createQuery(this.$store,query,type,slug,this.$route.router);
+   createQueryAndGo : function (query,slug) {
+     setQueryType(this.$store,this.form,query.query);
+     console.log("type: " + this.form.type);
+     createQuery(this.$store,query,this.form,this.$route.router);
        }
      },
 created () {

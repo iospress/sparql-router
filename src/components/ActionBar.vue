@@ -70,8 +70,8 @@ methods: {
       }
     })
   },
-  deleteQueryAndGo: function(type,slug) {
-    deleteQuery(this.$store,type,slug,this.$router);
+  deleteQueryAndGo: function(slug,type) {
+    deleteQuery(this.$store,slug,type,this.$router);
   },
 
 }

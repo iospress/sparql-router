@@ -13,7 +13,7 @@
       <div id="right" class="col-md-7 col-md-offset-1">
         <query-text :parent-form.sync="form"></query-text>
         <div class="form-group">
-          <button type="button" v-on:click="saveQueryAndGo(query,form.type,form.slug)" class="btn btn-primary navbar-right">Save</button>
+          <button type="button" v-on:click="saveQueryAndGo(query,form.slug)" class="btn btn-primary navbar-right">Save</button>
           <button type="button" v-on:click="testQuery(query,type)" class="btn btn-default navbar-right">Test</button>
         </div>
       </div>
@@ -39,6 +39,7 @@ import { sendHTTPRequest } from '../lib/actions.js'
 import { showDetails } from '../lib/actions.js'
 import { saveQuery } from '../lib/actions.js'
 import { testQuery } from '../lib/actions.js'
+import { setQueryType } from '../lib/actions.js'
 import { updateForm } from '../lib/actions.js'
 import { getForm } from '../lib/getters.js'
 import { getQuery } from '../lib/getters.js'
@@ -62,7 +63,8 @@ export default {
      saveQuery: saveQuery,
      testQuery: testQuery,
      showDetails: showDetails,
-     updateForm: updateForm
+     updateForm: updateForm,
+     setQueryType: setQueryType
    },
    getters: {
      form: getForm,
@@ -76,9 +78,10 @@ export default {
     }
   },
   methods: {
-    saveQueryAndGo: function(query,type,slug) {
-      console.log("slug: " + slug);
-      saveQuery(this.$store,query,type,slug);
+    saveQueryAndGo: function(query,slug) {
+      setQueryType(this.$store,this.form,query.query);
+      console.log("type: " + this.form.type);
+      saveQuery(this.$store,query,this.form);
     }
   },
   created: function () {

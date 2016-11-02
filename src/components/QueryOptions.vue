@@ -11,32 +11,17 @@
             <input class="form-control input-sm" title="Your name or email or nothing." id="author" v-model="thisQueryAuthor" placeholder="Author" type="text">
           </div>
           <div class="form-group">
-          <div class="radio">
-            <label>
-              <input name="type" v-model="thisQueryType" id="tables" value="tables" checked="" type="radio">
-              Table query (SELECT)
-            </label>
+            <label for="weburl" class="control-label">Web URL</label>
+              <input class="form-control input-sm" v-model="weburl" id="weburl" type="text" readonly>
           </div>
-          <div class="radio">
-            <label>
-              <input name="type" v-model="thisQueryType" id="graphs" value="graphs" type="radio">
-              Graph query (DESCRIBE, CONSTRUCT or ASK )
-            </label>
+          <div class="form-group">
+            <label for="apiurl" class="control-label">API URL</label>
+            <input class="form-control input-sm" v-model="apiurl" id="apiurl" type="text" readonly>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="weburl" class="control-label">Web URL</label>
-            <input class="form-control input-sm" v-model="weburl" id="weburl" type="text" readonly>
-        </div>
-        <div class="form-group">
-          <label for="apiurl" class="control-label">API URL</label>
-          <input class="form-control input-sm" v-model="apiurl" id="apiurl" type="text" readonly>
-        </div>
-  			<div class="form-group">
-  				<label for="endpoint" class="control-label">SPARQL endpoint URL</label>
-  				<input v-model="thisQueryEndpoint" placeholder="{{ defaultEndpointUrl }}" class="form-control input-sm" id="endpoint" title="The endpoint you want to query." type="text"/>
-  			</div>
-
+    			<div class="form-group">
+    				<label for="endpoint" class="control-label">SPARQL endpoint URL</label>
+    				<input v-model="thisQueryEndpoint" placeholder="{{ defaultEndpointUrl }}" class="form-control input-sm" id="endpoint" title="The endpoint you want to query." type="text"/>
+    			</div>
         </fieldset>
       </form>
 			<div class="well well-sm new" v-bind:class="{ 'error': message.error}" id="terminal" v-if="message.text">
@@ -108,17 +93,6 @@ export default {
         this.updateQuery(query);
       }
     },
-    thisQueryType: {
-      get () {
-        var result = (this.$route.params.type) ? this.$route.params.type : this.form.type
-        return result;
-      },
-      set (value) {
-        var form = this.form;
-        form.type = value;
-        this.updateForm(form);
-      }
-    },
     thisQuerySlug: {
       get () {
         return sanitize(slug(this.query.name).toLowerCase());
@@ -135,10 +109,10 @@ export default {
       }
     },
     apiurl : function () {
-      return siteRootUrl + "/api/" + this.thisQueryType + "/" + this.thisQuerySlug
+      return siteRootUrl + "/api/" + this.form.type + "/" + this.thisQuerySlug
     },
     weburl : function () {
-      return siteRootUrl + "/#/view/" + this.thisQueryType + "/" + this.thisQuerySlug
+      return siteRootUrl + "/#/view/" + this.form.type + "/" + this.thisQuerySlug
     },
     defaultEndpointUrl : function () {
       return app.defaultEndpoint.replace("/localhost",app.config.public.hostname);
